@@ -1,4 +1,5 @@
 import {PersistentStructure, Equatable, Hashable, RecursiveUnwrappable, modify, commit, UpdaterFn, update as _update} from '@frptools/core';
+import {unwrap} from '@collectable/core';
 
 export type CollectionEntry<K, V> = [K, V]|{key: K, value: V}|K|V;
 
@@ -38,14 +39,29 @@ export namespace IndexedCollection {
 
   export function updateEntry<K, V, T extends CollectionEntry<K, V>, U, C extends IndexedCollection<K, V, T, U>>(updater: (value: V, collection: C) => any, key: K, collection: C): C {
     var next = modify(collection);
+    console.log(`---`);
+    console.log(`updateEntry inside...`);
+    console.log(`---`);
+    console.log({collection: unwrap(collection)});
+    console.log({next: unwrap(next)});
+    console.log({updater});
+    console.log({key});
     next = next['@@update'](updater, key) || next;
-    return commit(next);
+    const committed = commit(next);
+    console.log({committed});
+    return committed;
   }
 }
 export function isCollection<T, U = any>(value: object): value is Collection<T, U> {
+  console.log('---');
+  console.log('isCollection()', value);
+  console.log('---');
   return '@@is-collection' in <any>value;
 }
 
 export function isIndexedCollection<K, V, T extends CollectionEntry<K, V>, U = any>(value: object): value is IndexedCollection<K, V, T, U> {
+  console.log('---');
+  console.log('isIndexedCollection()', value);
+  console.log('---');
   return isCollection(value) && '@@verifyKey' in <any>value;
 }
